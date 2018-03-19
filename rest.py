@@ -80,3 +80,24 @@ class KK_REST:
                 'KKCOINTIMESTAMP': nonce
             }
         ).json()
+    
+    def openorders(self, symbol):
+        path = '/rest/openorders'
+        request_url = BASE_URL + path
+
+        payload = OrderedDict([
+            ('symbol', symbol)])
+
+        nonce = str(int(time.time()))
+        sigPayload = 'openorders' + json.dumps(payload, separators=(',', ':')) + nonce
+        signature = self.sign(sigPayload)
+
+        return requests.get(
+            request_url,
+            headers = {
+                'KKCOINAPIKEY': self.api_key,
+                'KKCOINSIGN': signature,
+                'KKCOINTIMESTAMP': nonce
+            },
+            params = payload
+        ).json()
