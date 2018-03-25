@@ -1,3 +1,8 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Installation
+# pip install websocket-client
 import websocket
 
 def on_message(ws, message):
