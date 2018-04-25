@@ -5,10 +5,7 @@ import json
 import requests
 from collections import OrderedDict
 
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
-from cryptography.hazmat.backends import default_backend
+from OpenSSL.crypto import load_privatekey, FILETYPE_PEM, sign
 from base64 import b64encode, b64decode
 
 BASE_URL = 'https://api.kkcoin.com'
@@ -18,22 +15,14 @@ class KK_REST:
     def __init__(self, api_key, api_secret, password):
         self.api_key = api_key
         self.api_secret = api_secret
-        self.password = password
+        self.password = password.encode()
 
     def sign(self, payload):
-        private_key = load_pem_private_key(
-            self.api_secret,
-            password = self.password,
-            backend = default_backend()
-        )
+        private_key = load_privatekey(FILETYPE_PEM, self.api_secret, self.password)
 
-        signature = private_key.sign(
-            payload,
-            padding.PKCS1v15(),
-            hashes.SHA256()
-        )
+        signature = sign(private_key, payload, 'sha256')
 
-        return b64encode(signature)
+        return b64encode(signature).decode()
 
     def trade(self, symbol, order_type, order_op, price, amount):
         path = '/rest/trade'
@@ -49,8 +38,8 @@ class KK_REST:
         nonce = str(int(time.time()))
         sigPayload = 'trade' + json.dumps(payload, separators=(',', ':')) + nonce
         signature = self.sign(sigPayload)
-
-        print sigPayload
+        print(sigPayload)
+        print(signature)
 
         return requests.post(
             request_url,
@@ -71,6 +60,8 @@ class KK_REST:
         nonce = str(int(time.time()))
         sigPayload = 'balance' + json.dumps(payload) + nonce
         signature = self.sign(sigPayload)
+        print(sigPayload)
+        print(signature)
 
         return requests.get(
             request_url,
