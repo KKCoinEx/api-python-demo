@@ -15,7 +15,7 @@ price = 0.001
 amount = 1000
 
 result = kk_rest.trade(symbol, order_type, order_op, price, amount)
-print result
+print(result)
 
 result = kk_rest.balance()
-print result
+print(result)
